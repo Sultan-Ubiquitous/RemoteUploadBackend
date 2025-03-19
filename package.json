@@ -15,5 +15,12 @@
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.10",
     "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@clerk/express": "^1.3.54",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "prisma": "^6.5.0",
+    "tsx": "^4.19.3"
   }
 }
