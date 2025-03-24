@@ -20,6 +20,7 @@
     "@clerk/express": "^1.3.54",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "googleapis": "^129.0.0",
     "prisma": "^6.5.0",
     "tsx": "^4.19.3"
   }
