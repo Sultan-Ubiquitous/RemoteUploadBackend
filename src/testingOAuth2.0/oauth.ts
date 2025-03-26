@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 import express, {Request, Response, Application} from "express";
 import session from 'express-session';
 import {Redis} from "ioredis";
-const RedisStore = require("connect-redis")(session)
+import { RedisStore } from "connect-redis";
 
 dotenv.config();
 
@@ -13,6 +13,12 @@ const app: Application = express();
 const PORT = process.env.OAUTH_PORT || 8080;
 
 app.use(express.json());
+const secret = crypto.randomBytes(32).toString('hex');
+app.use(session({
+    secret: secret,
+    resave: false,
+    saveUninitialized: true,
+}));
 
 const oauth2Client = new google.auth.OAuth2(
     process.env.OAUTH_CLIENT_ID,
