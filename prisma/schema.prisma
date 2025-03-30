@@ -29,6 +29,7 @@ datasource db {
 
 model UserCredential {
   id   String @id @default(uuid())
+  name String
   email String @unique
   accessToken String
   refreshToken String
