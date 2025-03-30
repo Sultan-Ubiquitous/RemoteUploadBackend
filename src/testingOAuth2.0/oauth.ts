@@ -6,6 +6,9 @@ import session from 'express-session';
 import url from 'url';
 import crypto from 'crypto';
 
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
 dotenv.config();
 
 /** Redis stuff starts from here */
@@ -68,10 +71,65 @@ async function main(){
             include_granted_scopes: true,
             state: state
         })
-
+        console.log("Did my part!");
+        
         res.redirect(authorizationURL)
     });
 
+    app.get(`/${process.env.OAUTH_REDIRECT_URL}`, async(req: Request, res: Response)=>{
+        console.log("Sup babbey");
+        
+        let q = url.parse(req.url, true).query;
+
+        if(q.error){
+            console.log("Some error occured", q.error);            
+        } else if(q.state !== req.session.state){
+            console.log("State mismatched possible CSRF attack, u being slimed homie. Do sum bout it.");
+            res.send("State mismatched possible CSRF attack, u being slimed homie. Do sum bout it.")            
+        } else{
+            let {tokens} = await oauth2Client.getToken(q.code);
+            oauth2Client.setCredentials(tokens);
+            /**
+             * Let's try storing the token in database now
+             */
+            
+            const oauth2 = google.oauth2({version: "v2", auth: oauth2Client });
+            const userInfo = await oauth2.userinfo.get();
+
+            const name = userInfo.data.name;
+            const email = userInfo.data.email;
+
+            //Storing shit in prisma now;
+            await prisma.userCredential.upsert({
+                where: {email},
+                update: {
+                    accessToken: tokens.access_token,
+                    refreshToke: tokens.refresh_token || ' ',
+                    expiresAt: new Date(Date.now() + tokens.expiry_date),
+                },
+                create: {
+                    email,
+                    name: name,
+                    accessToken: tokens.access_token,
+                    refreshToken: tokens.refresh_token || '',
+                    expiresAt: new Date(Date.now() + tokens.expiry_date),
+                  },
+            });
+
+            console.log('User credentials stored successfully.');
+
+
+            /**
+             * DB shit ends here
+             */
+            console.log("Now u can use youtube api ninja");
+            res.json({
+                'msg': "U is good homie, now u official"
+            });
+            
+        }
+    })
+    
     app.listen(PORT, () => {
         console.log(`Server be running on http://localhost:${PORT}`);
     });
