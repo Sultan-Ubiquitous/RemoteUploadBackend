@@ -110,6 +110,7 @@ async function main(){
                     refreshToken: tokens.refresh_token || ' ',
                     expiresAt: new Date(Date.now() + tokens.expiry_date),
                 },
+                //for za green mark
                 create: {
                     email,
                     name: name,
