@@ -13,19 +13,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// enum ApprovalStatus {
-//   PENDING
-//   APPROVED
-// }
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+}
 
-// model File {
-//   id        Int      @id @default(autoincrement())
-//   fileName String @unique
-//   approval ApprovalStatus @default(PENDING)
-//   uploadedAt DateTime @default(now())
-//   approvedAt DateTime
-//   fileType String
-// }
+model File {
+  id        Int      @id @default(autoincrement())
+  fileName String @unique
+  approval ApprovalStatus @default(PENDING)
+  uploadedAt DateTime @default(now())
+  approvedAt DateTime
+  fileType String
+}
 
 model UserCredential {
   id   String @id @default(uuid())

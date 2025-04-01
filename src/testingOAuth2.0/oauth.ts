@@ -54,9 +54,12 @@ async function main(){
     );
 
     const scopes = [
-        'https://www.googleapis.com/auth/youtube.upload',
+        'https://www.googleapis.com/auth/youtube.upload', 
         'https://www.googleapis.com/auth/youtube.readonly',
-    ]
+        'email',
+        'profile',
+        'https://www.googleapis.com/auth/youtube' // Full YouTube access
+      ];
 
     app.get('/', async(req: Request, res: Response) => {
 
@@ -76,7 +79,7 @@ async function main(){
         res.redirect(authorizationURL)
     });
 
-    app.get(`/${process.env.OAUTH_REDIRECT_URL}`, async(req: Request, res: Response)=>{
+    app.get('/oauth2callback', async(req: Request, res: Response)=>{
         console.log("Sup babbey");
         
         let q = url.parse(req.url, true).query;
@@ -98,13 +101,13 @@ async function main(){
 
             const name = userInfo.data.name;
             const email = userInfo.data.email;
-
+            userCredential = tokens;
             //Storing shit in prisma now;
             await prisma.userCredential.upsert({
                 where: {email},
                 update: {
                     accessToken: tokens.access_token,
-                    refreshToke: tokens.refresh_token || ' ',
+                    refreshToken: tokens.refresh_token || ' ',
                     expiresAt: new Date(Date.now() + tokens.expiry_date),
                 },
                 create: {
@@ -116,12 +119,13 @@ async function main(){
                   },
             });
 
-            console.log('User credentials stored successfully.');
+            // console.log('User credentials stored successfully.');
 
 
             /**
              * DB shit ends here
              */
+            // 
             console.log("Now u can use youtube api ninja");
             res.json({
                 'msg': "U is good homie, now u official"
