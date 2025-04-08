@@ -1,6 +1,6 @@
-import express, {Request, Response} from "express";
+import express, {Request, Response, Router} from "express";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 
 router.get('/get_uploads', (req: Request, res: Response) => {
