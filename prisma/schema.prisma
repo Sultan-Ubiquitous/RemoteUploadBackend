@@ -13,26 +13,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ApprovalStatus {
-  PENDING
-  APPROVED
-}
-
-model File {
-  id        Int      @id @default(autoincrement())
-  fileName String @unique
-  approval ApprovalStatus @default(PENDING)
-  uploadedAt DateTime @default(now())
-  approvedAt DateTime
-  fileType String
-}
-
-model UserCredential {
-  id   String @id @default(uuid())
-  name String
-  email String @unique
-  accessToken String
-  refreshToken String
-  expiresAt DateTime
+model User {
+  id String @id @default(cuid())
+  email String? @unique
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tokens AuthToken[]
+}
+
+model AuthToken{
+  id String @id @unique @default(cuid())
+  userId String @unique
+  user User @relation(fields: [userId], references: [id])
+  accessToken String
+  refreshToken String?
+  expiryDate DateTime?
+  tokenType String?
+  scope String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

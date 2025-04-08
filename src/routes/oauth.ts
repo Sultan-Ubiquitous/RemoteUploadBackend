@@ -1,10 +1,10 @@
 import { google } from "googleapis";
 import crypto from 'crypto';
 import dotenv from 'dotenv'
-import express, {Request, Response, Application} from "express";
+import express, {Request, Response, routerlication} from "express";
 import session from 'express-session';
 import url from 'url';
-import crypto from 'crypto';
+
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
@@ -28,19 +28,19 @@ redisClient.on('error', function(){
     console.log('Connected succesfully with redis.');
 });
 
-let userCredential = null;
 
-async function main(){
-    const app: Application = express();
+
+// const router: routerlication = express();
+const router = express.Router();
     // const PORT = process.env.OAUTH_PORT || 8080;
     const PORT =  8060;
 
 
-    app.use(express.json());
+    router.use(express.json());
 
     const secret = crypto.randomBytes(32).toString('hex');
     
-    app.use(session({
+    router.use(session({
         store: new redisStore({client: redisClient}),
         secret: secret,
         resave: false,
@@ -60,8 +60,12 @@ async function main(){
         'profile',
         'https://www.googleapis.com/auth/youtube' // Full YouTube access
       ];
-
-    app.get('/', async(req: Request, res: Response) => {
+    router.get('/', async(req: Request, res: Response) => {
+        res.json({
+            "msg": "Sup dawg, u good now but I will add some ways to check if request is authenticated or naw."
+        });
+    })
+    router.get('/oauth', async(req: Request, res: Response) => {
 
         const state = crypto.randomBytes(32).toString('hex');
         
@@ -79,7 +83,7 @@ async function main(){
         res.redirect(authorizationURL)
     });
 
-    app.get('/oauth2callback', async(req: Request, res: Response)=>{
+    router.get('/oauth2callback', async(req: Request, res: Response)=>{
         console.log("Sup babbey");
         
         let q = url.parse(req.url, true).query;
@@ -99,28 +103,42 @@ async function main(){
             const oauth2 = google.oauth2({version: "v2", auth: oauth2Client });
             const userInfo = await oauth2.userinfo.get();
 
-            const name = userInfo.data.name;
-            const email = userInfo.data.email;
-            userCredential = tokens;
+            
             //Storing shit in prisma now;
-            await prisma.userCredential.upsert({
-                where: {email},
-                update: {
-                    accessToken: tokens.access_token,
-                    refreshToken: tokens.refresh_token || ' ',
-                    expiresAt: new Date(Date.now() + tokens.expiry_date),
-                },
-                //for za green mark
+            // 
+            
+            const user = await prisma.user.upsert({
+                where: { email: userInfo.data.email },
                 create: {
-                    email,
-                    name: name,
-                    accessToken: tokens.access_token,
-                    refreshToken: tokens.refresh_token || '',
-                    expiresAt: new Date(Date.now() + tokens.expiry_date),
-                  },
+                    email: userInfo.data.email,
+                },
+                update: {},
             });
 
-            // console.log('User credentials stored successfully.');
+            await prisma.authToken.upsert({
+                where: {
+                    // AuthToken needs a unique identifier - use the userId as there should only be one token per user
+                    userId: user.id
+                },
+                create: {
+                    userId: user.id,
+                    accessToken: tokens.access_token,
+                    refreshToken: tokens.refresh_token || null,
+                    expiryDate: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+                    tokenType: tokens.token_type,
+                    scope: tokens.scope
+                },
+                update: {
+                    accessToken: tokens.access_token,
+                    refreshToken: tokens.refresh_token || null,
+                    expiryDate: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+                    tokenType: tokens.token_type, // Fixed the casing here (was TokenType in your original)
+                    scope: tokens.scope
+                }
+            });
+
+            req.session.userId = user.id;
+            console.log('User credentials stored successfully.');
 
 
             /**
@@ -128,18 +146,13 @@ async function main(){
              */
             // 
             console.log("Now u can use youtube api ninja");
-            res.json({
-                'msg': "U is good homie, now u official"
-            });
+            res.redirect('/');
             
         }
     })
     
-    app.listen(PORT, () => {
-        console.log(`Server be running on http://localhost:${PORT}`);
-    });
-    
-}
+    // app.listen(PORT, () => {
+    //     console.log(`Server be running on http://localhost:${PORT}`);
+    // });
 
-main().catch(console.error);
-
+    module.exports = router;

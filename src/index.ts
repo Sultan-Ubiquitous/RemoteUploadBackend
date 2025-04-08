@@ -1,12 +1,15 @@
 import express, { Application, Request, Response } from "express";
 import dotenv from 'dotenv'
+import OauthRouter from "./routes/oauth";
+
+
 
 dotenv.config();
 
 const app: Application = express();
-const PORT = process.env.PORT || 3606;
+const PORT = process.env.PORT || 8060;
 
-
+app.use('/auth', OauthRouter);
 app.use(express.json());
 
 
@@ -37,6 +40,7 @@ app.post('/upload_to_youtube', (req: Request, res: Response) => {
         "Uploaded to s3": "Upload complete"
     });
 })
+
 
 app.listen(PORT, () => {
     console.log(`Server be running on http://localhost:${PORT}`);
