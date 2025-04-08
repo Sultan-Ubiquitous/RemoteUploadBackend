@@ -1,6 +1,9 @@
 import express, { Application, Request, Response } from "express";
 import dotenv from 'dotenv'
-import OauthRouter from "./routes/oauth";
+//@ts-ignore
+import OauthRouter from "./routes/oauth"; //@ts-ignore
+import UploadRouter from "./routes/editor/upload"; //@ts-ignore
+import YoutubeRouter from "./routes/youtuber/youtube";
 
 
 
@@ -10,6 +13,8 @@ const app: Application = express();
 const PORT = process.env.PORT || 8060;
 
 app.use('/auth', OauthRouter);
+app.use('/editor', UploadRouter);
+app.use('/youtuber', YoutubeRouter);
 app.use(express.json());
 
 
@@ -18,28 +23,6 @@ app.get('/', (req: Request, res: Response) => {
         "message": "Hello"
     });
 });
-
-app.get('/get_uploads', (req: Request, res: Response) => {
-    res.json({
-        "uploads": "All Uploades"
-    });
-});
-
-app.post('/upload_files', (req: Request, res: Response) => {
-    
-    /**Do something to upload files to s3 */
-
-
-    res.json({
-        "Uploaded to s3": "Upload complete"
-    });
-});
-
-app.post('/upload_to_youtube', (req: Request, res: Response) => {
-    res.json({
-        "Uploaded to s3": "Upload complete"
-    });
-})
 
 
 app.listen(PORT, () => {

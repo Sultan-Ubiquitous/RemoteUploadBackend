@@ -1,7 +1,7 @@
 import { google } from "googleapis";
 import crypto from 'crypto';
 import dotenv from 'dotenv'
-import express, {Request, Response, routerlication} from "express";
+import express, {Request, Response, Router} from "express";
 import session from 'express-session';
 import url from 'url';
 
@@ -12,6 +12,7 @@ const prisma = new PrismaClient();
 dotenv.config();
 
 /** Redis stuff starts from here */
+//@ts-ignore
 import redis from 'redis';
 import connectRedis from 'connect-redis';
 
@@ -31,9 +32,10 @@ redisClient.on('error', function(){
 
 
 // const router: routerlication = express();
-const router = express.Router();
+const router: Router = express.Router();
+
     // const PORT = process.env.OAUTH_PORT || 8080;
-    const PORT =  8060;
+    // const PORT =  8060;
 
 
     router.use(express.json());
@@ -68,7 +70,7 @@ const router = express.Router();
     router.get('/oauth', async(req: Request, res: Response) => {
 
         const state = crypto.randomBytes(32).toString('hex');
-        
+        //@ts-ignore
         req.session.state = state;
         console.log(state);
 
@@ -89,11 +91,13 @@ const router = express.Router();
         let q = url.parse(req.url, true).query;
 
         if(q.error){
-            console.log("Some error occured", q.error);            
+            console.log("Some error occured", q.error);
+            //@ts-ignore            
         } else if(q.state !== req.session.state){
             console.log("State mismatched possible CSRF attack, u being slimed homie. Do sum bout it.");
             res.send("State mismatched possible CSRF attack, u being slimed homie. Do sum bout it.")            
         } else{
+            //@ts-ignore
             let {tokens} = await oauth2Client.getToken(q.code);
             oauth2Client.setCredentials(tokens);
             /**
@@ -136,7 +140,7 @@ const router = express.Router();
                     scope: tokens.scope
                 }
             });
-
+            //@ts-ignore
             req.session.userId = user.id;
             console.log('User credentials stored successfully.');
 
