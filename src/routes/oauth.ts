@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import express, {Request, Response, Router} from "express";
 import session from 'express-session';
 import url from 'url';
+import { clerkMiddleware, requireAuth } from "@clerk/express";
 
 
 const { PrismaClient } = require('@prisma/client');
@@ -37,7 +38,8 @@ const router: Router = express.Router();
     // const PORT = process.env.OAUTH_PORT || 8080;
     // const PORT =  8060;
 
-
+    router.use(clerkMiddleware());
+    router.use(requireAuth());
     router.use(express.json());
 
     const secret = crypto.randomBytes(32).toString('hex');

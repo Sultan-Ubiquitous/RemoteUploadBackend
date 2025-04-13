@@ -1,7 +1,10 @@
 import express, {Request, Response, Router} from "express";
+import { clerkMiddleware, requireAuth } from "@clerk/express";
 
 const router: Router = express.Router();
 
+router.use(clerkMiddleware());
+router.use(requireAuth());
 
 router.get('/get_uploads', (req: Request, res: Response) => {
     res.json({
