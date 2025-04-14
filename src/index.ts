@@ -3,8 +3,8 @@ import dotenv from 'dotenv'
 import cors from 'cors';
 //@ts-ignore routes and shit
 import OauthRouter from "./routes/oauth"; //@ts-ignore
-import UploadRouter from "./routes/editor/upload"; //@ts-ignore
-import YoutubeRouter from "./routes/youtuber/youtube";
+import UploadRouter from "./routes/member/upload"; //@ts-ignore
+import YoutubeRouter from "./routes/owner/youtube";
 
 //Clerk imports
 import { clerkMiddleware, requireAuth} from "@clerk/express";
