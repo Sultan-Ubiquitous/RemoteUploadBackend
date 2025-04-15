@@ -1,6 +1,6 @@
 import express, {Request, Response, Router} from "express";
 import { clerkMiddleware, requireAuth } from "@clerk/express";
-import { createUser } from "../../services/user";
+import { createUser, createOrganization } from "../../services/createThings";
 
 
 const router: Router = express.Router();
@@ -26,10 +26,24 @@ router.post('/create_editor', (req: Request, res: Response)=>{
     //This will only work after the person is invited, will look into this too when the user is invited and shiz
 })
 
-router.post('/create_organization', (req: Request, res: Response) => {
-    //This route will get userId, organization name and slug, it will create organization using the createOrganizationFunction
-    //And make a database entry too 
+router.post('/create_organization', async (req: Request, res: Response) => {
+    try {
+        const {orgName, orgSlug, ownerId } = req.body;
+
+        const newOrganization = await createOrganization(orgName, orgSlug, ownerId);
+        console.log(newOrganization);
+        
+        res.status(201).json(newOrganization)
+    } catch (error) {
+        console.log('Error creating user:', error);
+        res.status(500).json({ message: 'Internal Server error'});
+    } 
 });
 
 module.exports = router;
+
+const orgName = 'Nigga'
+const orgSlug = 'nigga-dot'
+const ownerId = 'user_2vRcdfui0UV8g6ewp5KkzjwNcRb'
+
 
