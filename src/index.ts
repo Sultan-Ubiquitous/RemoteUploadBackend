@@ -4,7 +4,8 @@ import cors from 'cors';
 //@ts-ignore routes and shit
 import OauthRouter from "./routes/oauth"; //@ts-ignore
 import UploadRouter from "./routes/member/upload"; //@ts-ignore
-import YoutubeRouter from "./routes/owner/youtube";
+import YoutubeRouter from "./routes/owner/youtube"; //@ts-ignore
+import OnboardRouter from "./routes/onboarding/onboard"
 
 //Clerk imports
 import { clerkMiddleware, requireAuth} from "@clerk/express";
@@ -21,6 +22,8 @@ app.use(clerkMiddleware());
 app.use('/auth', OauthRouter);
 app.use('/editor', UploadRouter);
 app.use('/youtube', YoutubeRouter);
+app.use('/onboard', OnboardRouter);
+
 
 
 app.get('/test', requireAuth(), (req: Request, res: Response) => {
@@ -31,7 +34,7 @@ app.get('/test', requireAuth(), (req: Request, res: Response) => {
 
 app.get('/', (req: Request, res: Response) => {
     res.json({
-        "message": "If you are accessing this then may or may not be authenticated blud"
+        "Error": "If you are accessing this then may or may not be authenticated blud"
     });
 });
 

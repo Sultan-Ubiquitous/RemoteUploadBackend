@@ -13,10 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  editor
-  youtuber
-}
 
 model User {
   id String @id @default(cuid())
@@ -51,7 +47,7 @@ model OrganizationMember{
   userId String
   @@unique([organizationId, userId])
 
-  
+
   createdAt DateTime @default(now())
 
 }

@@ -7,8 +7,8 @@ import url from 'url';
 import { clerkMiddleware, requireAuth } from "@clerk/express";
 
 
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+import { prismaGlobalClient } from "../prisma/prisma_client";
+const prisma = prismaGlobalClient;
 
 dotenv.config();
 
@@ -113,20 +113,21 @@ const router: Router = express.Router();
             //Storing shit in prisma now;
             // 
             
-            const user = await prisma.user.upsert({
-                where: { email: userInfo.data.email },
-                create: {
-                    email: userInfo.data.email,
-                },
-                update: {},
-            });
+            const user = await prisma.user.findUnique({
+                where:{
+                    //@ts-ignore
+                    email: userInfo.data.email
+                } 
+            })
 
             await prisma.authToken.upsert({
                 where: {
                     // AuthToken needs a unique identifier - use the userId as there should only be one token per user
+                    //@ts-ignore
                     userId: user.id
                 },
                 create: {
+                    //@ts-ignore
                     userId: user.id,
                     accessToken: tokens.access_token,
                     refreshToken: tokens.refresh_token || null,
