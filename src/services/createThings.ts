@@ -53,5 +53,5 @@ export async function createOrganization(orgName: string, orgSlug: string, owner
     console.error('Error creating Organization:', error)
         throw error
     }
-    
+        
 }
